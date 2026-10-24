@@ -1,0 +1,45 @@
+name: MaintainerKit Issue Triage
+description: >-
+  Triage GitHub issues with deterministic fallback or an optional OpenAI-compatible
+  model. It posts a reviewable report and never applies labels unless enabled.
+author: MaintainerKit contributors
+branding:
+  icon: git-pull-request
+  color: blue
+inputs:
+  github_token:
+    description: Token with issues read/write access for this repository
+    required: true
+  api_key:
+    description: Optional API key for an OpenAI-compatible chat completions endpoint
+    required: false
+    default: ''
+  base_url:
+    description: OpenAI-compatible API base URL
+    required: false
+    default: https://api.openai.com/v1
+  model:
+    description: Chat completions model name
+    required: false
+    default: gpt-4.1-mini
+  apply_labels:
+    description: Apply recommended labels automatically (false is safer)
+    required: false
+    default: 'false'
+  max_issue_scan:
+    description: Maximum number of recent open issues used for duplicate suggestions
+    required: false
+    default: '30'
+runs:
+  using: composite
+  steps:
+    - name: Run MaintainerKit
+      shell: bash
+      env:
+        MAINTAINERKIT_GITHUB_TOKEN: ${{ inputs.github_token }}
+        MAINTAINERKIT_API_KEY: ${{ inputs.api_key }}
+        MAINTAINERKIT_BASE_URL: ${{ inputs.base_url }}
+        MAINTAINERKIT_MODEL: ${{ inputs.model }}
+        MAINTAINERKIT_APPLY_LABELS: ${{ inputs.apply_labels }}
+        MAINTAINERKIT_MAX_ISSUE_SCAN: ${{ inputs.max_issue_scan }}
+      run: python3 "$GITHUB_ACTION_PATH/src/maintainerkit.py"
